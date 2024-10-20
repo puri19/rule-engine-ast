@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rule Engine with AST</title>
+    <script>
+        // Function to create a new rule
+        async function createRule() {
+            const ruleString = document.getElementById('ruleString').value;
+            const response = await fetch('api.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `rule_string=${encodeURIComponent(ruleString)}`,
+            });
+            const data = await response.json();
+            alert(data.message || data.error);
+            loadRules();
+        }
+
+        // Function to load all rules
+        async function loadRules() {
+            const response = await fetch('api.php');
+            const rules = await response.json();
+            const rulesList = document.getElementById('rulesList');
+            rulesList.innerHTML = '';
+            rules.forEach(rule => {
+                const li = document.createElement('li');
+                li.textContent = `ID: ${rule.id}, Rule: ${rule.rule_string}`;
+                rulesList.appendChild(li);
+            });
+        }
+
+        // Function to evaluate a specific rule
+        async function evaluateRule() {
+            const ruleId = document.getElementById('ruleId').value;
+            const age = document.getElementById('age').value;
+            const department = document.getElementById('department').value;
+
+            const response = await fetch('api.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `evaluate_rule=true&rule_id=${ruleId}&age=${age}&department=${encodeURIComponent(department)}`,
+            });
+            const result = await response.json();
+            alert(`Rule Evaluation: ${result.result || result.error}`);
+        }
+
+        // Load rules when the page is first opened
+        window.onload = loadRules;
+    </script>
+</head>
+<body>
+    <h1>Rule Engine</h1>
+    <input type="text" id="ruleString" placeholder="Enter Rule" />
+    <button onclick="createRule()">Add Rule</button>
+
+    <h2>Existing Rules:</h2>
+    <ul id="rulesList"></ul>
+
+    <h3>Evaluate a Rule</h3>
+    <input type="text" id="ruleId" placeholder="Rule ID" />
+    <input type="number" id="age" placeholder="Enter Age" />
+    <input type="text" id="department" placeholder="Enter Department" />
+    <button onclick="evaluateRule()">Evaluate Rule</button>
+</body>
+</html>
